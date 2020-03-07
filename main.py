@@ -11,7 +11,7 @@ from pip._vendor.urllib3.connectionpool import xrange
 
 # bmp = open('test.bmp', 'rb')
 
-bmp = Image.open('barev16.bmp').convert('RGB')
+bmp = Image.open('test3.bmp').convert('RGB')
 pixels = list(bmp.getdata())
 width, height = bmp.size
 print(pixels)
@@ -88,8 +88,8 @@ def invert(image):
   # Return new image
   return new
 
-a=convert_grayscale(bmp)
-#a=invert(bmp)
+#a=convert_grayscale(bmp)
+a=invert(bmp)
 a.show()
 #ulození 4bit pochybné
 #bmp.save('novy.bmp',bit=4)

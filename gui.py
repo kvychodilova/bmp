@@ -1,6 +1,7 @@
 import sys
 
-
+from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget,\
     QPushButton, QVBoxLayout, QBoxLayout, QHBoxLayout, QGridLayout, QFileDialog
@@ -15,8 +16,11 @@ class MainWindow(QWidget):
 
         self._open_button = QPushButton("Otevrit", self)
         self._grayscale_button = QPushButton("Odstiny sedi", self)
+        self._invers_button = QPushButton("Inverze", self)
+
 
         self._image_label = QLabel()
+        #self._image_label.setFixedWidth(100)
         self._info_label = QLabel()
 
         #self._image = QPixmap('new.bmp')
@@ -24,31 +28,92 @@ class MainWindow(QWidget):
         #self.resize(self._image.width(),self._image.height())
 
 
+
         grid = QGridLayout()
+        grid_2 = QVBoxLayout()
+        grid.addLayout(grid_2,0,0)
+        grid_2.addWidget(self._open_button)
+        grid_2.addWidget(self._grayscale_button)
+        grid_2.addWidget(self._invers_button)
 
-        layout = QHBoxLayout()
-        layout.addWidget(self._open_button)
-        layout.addWidget(self._grayscale_button)
-
-        grid.addLayout(layout,1,1)
-
-        layout_data = QGridLayout()
-        layout_data.addWidget(self._image_label, 1,1)
+        grid.addWidget(self._image_label, 0,1)
         #layout_data.addStretch()
-        layout_info = QGridLayout()
-        layout_info.addWidget(self._info_label,1,2)
+        grid.addWidget(self._info_label,0,2)
 
 
-        grid.addLayout(layout_data,3,1)
-        grid.addLayout(layout_info,2,2)
-        self.setLayout(layout_info)
-        self.setLayout(layout)
-        self.setLayout(layout_data)
+
         self.setLayout(grid)
-
+        self.setLayout(grid_2)
         self._open_button.clicked.connect(self.select)
         self._grayscale_button.clicked.connect(self.grayscale_filter)
+        self._invers_button.clicked.connect(self.invert_filter)
 
+
+
+    def invert_filter(self):
+
+         def get_pixel(image, i, j):
+            # Inside image bounds?
+            width, height = image.size
+            if i > width or j > height:
+              return None
+
+            # Get Pixel
+            pixel = image.getpixel((i, j))
+            return pixel
+
+         bmp = Image.open(soubor).convert('RGB')             #!!!!!!!!!!!!!
+         width, height = bmp.size
+         new = Image.new("RGB", (width, height), "white")
+         pixels = new.load()
+         for i in range(width):
+            for j in range(height):
+          # Get Pixel
+                  pixel = get_pixel(bmp, i, j)
+
+                  # Get R, G, B values (This are int from 0 to 255)
+                  red =   pixel[0]
+                  green = pixel[1]
+                  blue =  pixel[2]
+
+                  # Transform to grayscale
+                  gray = (255-red) + (255-green) + (255-blue)
+
+                  # Set Pixel in new image
+                  pixels[i, j] = (int(gray), int(gray), int(gray))
+
+         # Return new image
+         new.show()
+         return
+         """
+         for i in range(width):
+            for j in range(height):
+              # Get Pixel
+              pixel = get_pixel(bmp, i, j)
+
+              # Get R, G, B values (This are int from 0 to 255)
+              red =   pixel[0]
+              green = pixel[1]
+              blue =  pixel[2]
+
+
+              red = (393 *red + 769*green + 189*blue)/1000
+              green = (349 *red + 686*green + 168*blue)/1000
+              blue = (272 *red + 534*green + 131*blue)/1000
+              if red>255:
+                  sep_red=255
+              elif green>255:
+                  green=255
+              elif blue>255:
+                  blue=255
+
+              # Set Pixel in new image
+              pixels[i, j] = (int(red), int(green), int(blue))
+
+         # Return new image
+         new.show()
+         return
+        """
 
 
 
@@ -132,6 +197,6 @@ class MainWindow(QWidget):
 app = QApplication(sys.argv)
 w = MainWindow()
 w.setWindowTitle("Bitmap")
-w.setGeometry(10,10,300,200)
+w.setGeometry(900,500,500,200)
 w.show()
 sys.exit(app.exec())
