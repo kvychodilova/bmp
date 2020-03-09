@@ -1,12 +1,14 @@
 import sys
 
+
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QGroupBox
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget,\
     QPushButton, QVBoxLayout, QBoxLayout, QHBoxLayout, QGridLayout, QFileDialog
 
-from PIL import Image
+from PIL import Image, ImageDraw
 import struct
 
 
@@ -15,11 +17,15 @@ class MainWindow(QWidget):
         super().__init__(parent)
 
         self._open_button = QPushButton("Otevrit", self)
+        #self._open_button.setStyleSheet("background-color:green;")
         self._grayscale_button = QPushButton("Odstiny sedi", self)
         self._invers_button = QPushButton("Inverze", self)
-
+        self._mirror_button = QPushButton("Zrcadlení", self)
 
         self._image_label = QLabel()
+        self._image_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+        #self._image_label.setScaledContents(True)
+
         #self._image_label.setFixedWidth(100)
         self._info_label = QLabel()
 
@@ -35,6 +41,7 @@ class MainWindow(QWidget):
         grid_2.addWidget(self._open_button)
         grid_2.addWidget(self._grayscale_button)
         grid_2.addWidget(self._invers_button)
+        grid_2.addWidget(self._mirror_button)
 
         grid.addWidget(self._image_label, 0,1)
         #layout_data.addStretch()
@@ -44,10 +51,29 @@ class MainWindow(QWidget):
 
         self.setLayout(grid)
         self.setLayout(grid_2)
+
         self._open_button.clicked.connect(self.select)
         self._grayscale_button.clicked.connect(self.grayscale_filter)
         self._invers_button.clicked.connect(self.invert_filter)
+        self._mirror_button.clicked.connect(self.mirror_rotation)
 
+    def mirror_rotation(self):
+        input_image = Image.open(soubor).convert('RGB')
+        input_pixels = input_image.load()
+
+        # Create output image
+        output_image = Image.new("RGB", input_image.size,'white')
+        draw = ImageDraw.Draw(output_image)
+
+        # Copy pixels
+        for x in range(output_image.width):
+            for y in range(output_image.height):
+                xp = input_image.width - x - 1
+                draw.point((x, y), input_pixels[xp, y])
+
+        output_image.show()
+        #output_image.save("output.bmp")
+        return
 
 
     def invert_filter(self):
@@ -197,6 +223,7 @@ class MainWindow(QWidget):
 app = QApplication(sys.argv)
 w = MainWindow()
 w.setWindowTitle("Bitmap")
+#w.setStyleSheet("MainWindow {background: 'yellow';}")
 w.setGeometry(900,500,500,200)
 w.show()
 sys.exit(app.exec())
