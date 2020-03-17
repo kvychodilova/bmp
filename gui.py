@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QGroupBox
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget,\
-    QPushButton, QVBoxLayout, QBoxLayout, QHBoxLayout, QGridLayout, QFileDialog, QFrame
+    QPushButton, QVBoxLayout, QBoxLayout, QHBoxLayout, QGridLayout, QFileDialog, QFrame, QMessageBox
 
 from PIL import Image, ImageDraw
 import struct
@@ -16,11 +16,13 @@ class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        #Tlacitka - Nacteni
         self._open_button = QPushButton("Otevrit", self)
         self._open_button.setStyleSheet("background-color:#16f6c3;"
                                         "border-style: outset;border-width:"
                                         " 2px;border-radius: 10px;border-color: beige;"
                                         "font: bold 14px;min-width: 10em;padding: 6px;")
+        #Tlacitka - Uprava barev
         self._text_barvy = QLabel()
         self._text_barvy.setText('Upravit barvy')
         self._text_barvy.setAlignment(Qt.AlignCenter)
@@ -36,6 +38,7 @@ class MainWindow(QWidget):
                                         " 2px;border-radius: 10px;border-color: beige;"
                                         "font: bold 14px;min-width: 10em;padding: 6px;")
 
+        #Tlacitka - Rotace
         self._text_otoceni = QLabel()
         self._text_otoceni.setText('Otočení')
         self._text_otoceni.setAlignment(Qt.AlignCenter)
@@ -50,7 +53,7 @@ class MainWindow(QWidget):
                                         " 2px;border-radius: 10px;border-color: beige;"
                                         "font: bold 14px;min-width: 10em;padding: 6px;")
 
-
+        #Oblast zobrazení BMP
         self._image_label = QLabel()
         self._image_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
@@ -65,7 +68,7 @@ class MainWindow(QWidget):
 
 
 
-
+        #AppLayout
         grid = QGridLayout()
         grid_2 = QVBoxLayout()
         grid.addLayout(grid_2,0,0)
@@ -86,70 +89,141 @@ class MainWindow(QWidget):
         self.setLayout(grid)
         self.setLayout(grid_2)
 
+        #Prirazeni funkci tlacitkum
         self._open_button.clicked.connect(self.select)
         self._grayscale_button.clicked.connect(self.grayscale_filter)
         self._invers_button.clicked.connect(self.invert_filter)
         self._mirror_button.clicked.connect(self.mirror_rotation)
         self._180_button.clicked.connect(self.rotation180)
 
+        #Chybove hlaseni
+
+
 
     def rotation180(self):
-        input_image = Image.open(soubor).convert('RGB')
-        input_pixels = input_image.load()
+        try:
+            input_image = Image.open(soubor).convert('RGB')
+            input_pixels = input_image.load()
 
-        # Create output image
-        output_image = Image.new("RGB", input_image.size,'white')
-        draw = ImageDraw.Draw(output_image)
+            # Create output image
+            output_image = Image.new("RGB", input_image.size,'white')
+            draw = ImageDraw.Draw(output_image)
 
-        # Copy pixels
-        for x in range(output_image.width):
-            for y in range(output_image.height):
-                yp = input_image.height - y - 1
-                draw.point((x, y), input_pixels[x,yp])
+            # Copy pixels
+            for x in range(output_image.width):
+                for y in range(output_image.height):
+                    yp = input_image.height - y - 1
+                    draw.point((x, y), input_pixels[x,yp])
 
-        output_image.show()
-        #output_image.save("output.bmp")
-        return
+            output_image.show()
+            #output_image.save("output.bmp")
+            return
+        except Exception:
+           print("Chyba")
+           self._msgbox = QMessageBox()
+           self._msgbox.setIcon(QMessageBox.Warning)
+           self._msgbox.setText("Chyba! Není načten obrázek.")
+           self._msgbox.exec()
 
 
     def mirror_rotation(self):
-        input_image = Image.open(soubor).convert('RGB')
-        input_pixels = input_image.load()
+        try:
+            input_image = Image.open(soubor).convert('RGB')
+            input_pixels = input_image.load()
 
-        # Create output image
-        output_image = Image.new("RGB", input_image.size,'white')
-        draw = ImageDraw.Draw(output_image)
+            # Create output image
+            output_image = Image.new("RGB", input_image.size,'white')
+            draw = ImageDraw.Draw(output_image)
 
-        # Copy pixels
-        for x in range(output_image.width):
-            for y in range(output_image.height):
-                xp = input_image.width - x - 1
-                draw.point((x, y), input_pixels[xp, y])
+            # Copy pixels
+            for x in range(output_image.width):
+                for y in range(output_image.height):
+                    xp = input_image.width - x - 1
+                    draw.point((x, y), input_pixels[xp, y])
 
-        output_image.show()
-        #output_image.save("output.bmp")
-        return
+            output_image.show()
+            #output_image.save("output.bmp")
+            return
+        except Exception:
+           print("Chyba")
+           self._msgbox = QMessageBox()
+           self._msgbox.setIcon(QMessageBox.Warning)
+           self._msgbox.setText("Chyba! Není načten obrázek.")
+           self._msgbox.exec()
+            #return
+
+
 
 
     def invert_filter(self):
+        try:
+             def get_pixel(image, i, j):
+                # Inside image bounds?
+                width, height = image.size
+                if i > width or j > height:
+                  return None
 
-         def get_pixel(image, i, j):
-            # Inside image bounds?
-            width, height = image.size
-            if i > width or j > height:
-              return None
+                # Get Pixel
+                pixel = image.getpixel((i, j))
+                return pixel
 
-            # Get Pixel
-            pixel = image.getpixel((i, j))
-            return pixel
+             bmp = Image.open(soubor).convert('RGB')             #!!!!!!!!!!!!!
+             width, height = bmp.size
+             new = Image.new("RGB", (width, height), "white")
+             pixels = new.load()
+             for i in range(width):
+                for j in range(height):
+              # Get Pixel
+                      pixel = get_pixel(bmp, i, j)
 
-         bmp = Image.open(soubor).convert('RGB')             #!!!!!!!!!!!!!
-         width, height = bmp.size
-         new = Image.new("RGB", (width, height), "white")
-         pixels = new.load()
-         for i in range(width):
-            for j in range(height):
-          # Get Pixel
+                      # Get R, G, B values (This are int from 0 to 255)
+                      red =   pixel[0]
+                      green = pixel[1]
+                      blue =  pixel[2]
+
+                      # Transform to grayscale
+                      gray = (255-red) + (255-green) + (255-blue)
+
+                      # Set Pixel in new image
+                      pixels[i, j] = (int(gray), int(gray), int(gray))
+
+             # Return new image
+             new.show()
+             return
+        except Exception:
+              print("Chyba")
+              self._msgbox = QMessageBox()
+              self._msgbox.setIcon(QMessageBox.Warning)
+              self._msgbox.setText("Chyba! Není načten obrázek.")
+              self._msgbox.exec()
+
+
+    def grayscale_filter(self):
+        try:
+            def get_pixel(image, i, j):
+                # Inside image bounds?
+                width, height = image.size
+                if i > width or j > height:
+                  return None
+
+                # Get Pixel
+                pixel = image.getpixel((i, j))
+                return pixel
+            print(soubor)
+             # Get Image and size
+            bmp = Image.open(soubor).convert('RGB')             #!!!!!!!!!!!!!
+            width, height = bmp.size
+
+            # Create new Image and a Pixel Map
+            new = Image.new("RGB", (width, height), "white")
+            pixels = new.load()
+            #print('nnjnj'+pixels)
+
+
+            # Transform to grayscale
+            for i in range(width):
+                for j in range(height):
+                  # Get Pixel
                   pixel = get_pixel(bmp, i, j)
 
                   # Get R, G, B values (This are int from 0 to 255)
@@ -158,87 +232,20 @@ class MainWindow(QWidget):
                   blue =  pixel[2]
 
                   # Transform to grayscale
-                  gray = (255-red) + (255-green) + (255-blue)
+                  gray = (red * 0.299) + (green * 0.587) + (blue * 0.114)
 
                   # Set Pixel in new image
                   pixels[i, j] = (int(gray), int(gray), int(gray))
 
-         # Return new image
-         new.show()
-         return
-         """
-         for i in range(width):
-            for j in range(height):
-              # Get Pixel
-              pixel = get_pixel(bmp, i, j)
-
-              # Get R, G, B values (This are int from 0 to 255)
-              red =   pixel[0]
-              green = pixel[1]
-              blue =  pixel[2]
-
-
-              red = (393 *red + 769*green + 189*blue)/1000
-              green = (349 *red + 686*green + 168*blue)/1000
-              blue = (272 *red + 534*green + 131*blue)/1000
-              if red>255:
-                  sep_red=255
-              elif green>255:
-                  green=255
-              elif blue>255:
-                  blue=255
-
-              # Set Pixel in new image
-              pixels[i, j] = (int(red), int(green), int(blue))
-
-         # Return new image
-         new.show()
-         return
-        """
-
-
-
-    def grayscale_filter(self):
-        def get_pixel(image, i, j):
-            # Inside image bounds?
-            width, height = image.size
-            if i > width or j > height:
-              return None
-
-            # Get Pixel
-            pixel = image.getpixel((i, j))
-            return pixel
-        print(soubor)
-         # Get Image and size
-        bmp = Image.open(soubor).convert('RGB')             #!!!!!!!!!!!!!
-        width, height = bmp.size
-
-        # Create new Image and a Pixel Map
-        new = Image.new("RGB", (width, height), "white")
-        pixels = new.load()
-        #print('nnjnj'+pixels)
-
-
-        # Transform to grayscale
-        for i in range(width):
-            for j in range(height):
-              # Get Pixel
-              pixel = get_pixel(bmp, i, j)
-
-              # Get R, G, B values (This are int from 0 to 255)
-              red =   pixel[0]
-              green = pixel[1]
-              blue =  pixel[2]
-
-              # Transform to grayscale
-              gray = (red * 0.299) + (green * 0.587) + (blue * 0.114)
-
-              # Set Pixel in new image
-              pixels[i, j] = (int(gray), int(gray), int(gray))
-
-        # Return new image
-        new.show()
-        return
+            # Return new image
+            new.show()
+            return
+        except Exception:
+              print("Chyba")
+              self._msgbox = QMessageBox()
+              self._msgbox.setIcon(QMessageBox.Warning)
+              self._msgbox.setText("Chyba! Není načten obrázek.")
+              self._msgbox.exec()
 
 
     def select(self, pomocna=None):
