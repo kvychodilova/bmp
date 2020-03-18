@@ -1,5 +1,12 @@
-import sys
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
 
+if __name__ == "__main__":
+
+    import sys
+    sys.excepthook = except_hook
+
+import sys
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QFileInfo, QUrl
@@ -11,9 +18,12 @@ from PyQt5.QtWidgets import QApplication, QLabel, QWidget, \
 from PIL import Image, ImageDraw
 import struct
 
+
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        self._soubor = ""
 
         # Tlacitka - Nacteni
         self._open_button = QPushButton("Otevrit", self)
@@ -100,7 +110,7 @@ class MainWindow(QWidget):
 
     def rotation180(self):
         try:
-            input_image = Image.open(soubor).convert('RGB')
+            input_image = Image.open(self._soubor).convert('RGB')
             input_pixels = input_image.load()
 
             # Create output image
@@ -117,7 +127,9 @@ class MainWindow(QWidget):
             output_image.save('obraz_rotace180.bmp')
             self._image = QPixmap('obraz_rotace180.bmp')
             self._newimage_label.setPixmap(self._image.scaled(800, 500, Qt.KeepAspectRatio,Qt.FastTransformation))
+            self._soubor = 'obraz_rotace180.bmp'
             return
+
         except Exception:
             print("Chyba")
             self._msgbox = QMessageBox()
@@ -127,7 +139,7 @@ class MainWindow(QWidget):
 
     def mirror_rotation(self):
         try:
-            input_image = Image.open(soubor).convert('RGB')
+            input_image = Image.open(self._soubor).convert('RGB')
             input_pixels = input_image.load()
 
             # Create output image
@@ -145,6 +157,8 @@ class MainWindow(QWidget):
             output_image.save("obraz_zrcadleni.bmp")
             self._image = QPixmap('obraz_zrcadleni.bmp')
             self._newimage_label.setPixmap(self._image.scaled(800, 500, Qt.KeepAspectRatio, Qt.FastTransformation))
+            self._soubor = 'obraz_zrcadleni.bmp'
+
             return
         except Exception:
             print("Chyba")
@@ -165,7 +179,7 @@ class MainWindow(QWidget):
                 # Get Pixel
                 pixel = image.getpixel((i, j))
                 return pixel
-            bmp = Image.open(soubor).convert('RGB')  # !!!!!!!!!!!!!
+            bmp = Image.open(self._soubor).convert('RGB')  # !!!!!!!!!!!!!
             width, height = bmp.size
             new = Image.new("RGB", (width, height), "white")
             pixels = new.load()
@@ -191,7 +205,7 @@ class MainWindow(QWidget):
 
             self._image = QPixmap('obraz_invert.bmp')
             self._newimage_label.setPixmap(self._image.scaled(800, 500, Qt.KeepAspectRatio,Qt.FastTransformation))
-            soubor == cesta
+            self._soubor = 'obraz_invert.bmp'
             return
 
         except Exception:
@@ -214,9 +228,8 @@ class MainWindow(QWidget):
                 pixel = image.getpixel((i, j))
                 return pixel
 
-            print(soubor)
             # Get Image and size
-            bmp = Image.open(soubor).convert('RGB')  # !!!!!!!!!!!!!
+            bmp = Image.open(self._soubor).convert('RGB')  # !!!!!!!!!!!!!
             width, height = bmp.size
 
             # Create new Image and a Pixel Map
@@ -247,6 +260,8 @@ class MainWindow(QWidget):
             self._image = QPixmap('obraz_odstinySedi.bmp')
             #self._newimage_label.setPixmap(self._image)
             self._newimage_label.setPixmap(self._image.scaled(800, 500, Qt.KeepAspectRatio,Qt.FastTransformation))
+            self._soubor = 'obraz_odstinySedi.bmp'
+
             return
 
         except Exception:
@@ -293,8 +308,7 @@ class MainWindow(QWidget):
             'I', bmp.read(4)) + '\n'
                                 'Důležité barvy: %s' % struct.unpack('I', bmp.read(4)) + '\n'
                                 )
-        global soubor
-        soubor = fname[0]
+        self._soubor = fname[0]
         data = fname
         return data
 
