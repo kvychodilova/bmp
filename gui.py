@@ -92,12 +92,10 @@ class MainWindow(QWidget):
         grid_2.addWidget(self._text_nahled)
         grid_2.addWidget(self._image_label)
 
-        # grid.addWidget(self._image_label, 0,1)
         grid.addWidget(self._newimage_label, 0, 1)
-
-        # layout_data.addStretch()
         grid.addWidget(self._info_label, 0, 2)
 
+        #Nastavení Layout
         self.setLayout(grid)
         self.setLayout(grid_2)
 
@@ -179,7 +177,7 @@ class MainWindow(QWidget):
                 # Get Pixel
                 pixel = image.getpixel((i, j))
                 return pixel
-            bmp = Image.open(self._soubor).convert('RGB')  # !!!!!!!!!!!!!
+            bmp = Image.open(self._soubor).convert('RGB')
             width, height = bmp.size
             new = Image.new("RGB", (width, height), "white")
             pixels = new.load()
@@ -194,15 +192,14 @@ class MainWindow(QWidget):
                     blue = pixel[2]
 
                     # Transform to grayscale
-                    gray = (255 - red) + (255 - green) + (255 - blue)
+                    gray_r = (255 - red)
+                    gray_g = (255 - green)
+                    gray_b = (255 - blue)
 
                     # Set Pixel in new image
-                    pixels[i, j] = (int(gray), int(gray), int(gray))
+                    pixels[i, j] = (int(gray_r), int(gray_g), int(gray_b))
 
             # Return new image
-            # new.show()
-            cesta = new.save('obraz_invert.bmp')
-
             self._image = QPixmap('obraz_invert.bmp')
             self._newimage_label.setPixmap(self._image.scaled(800, 500, Qt.KeepAspectRatio,Qt.FastTransformation))
             self._soubor = 'obraz_invert.bmp'
@@ -235,8 +232,6 @@ class MainWindow(QWidget):
             # Create new Image and a Pixel Map
             new = Image.new("RGB", (width, height), "white")
             pixels = new.load()
-            # print('nnjnj'+pixels)
-
 
             # Transform to grayscale
             for i in range(width):
@@ -258,10 +253,8 @@ class MainWindow(QWidget):
             # Return new image
             new.save('obraz_odstinySedi.bmp')
             self._image = QPixmap('obraz_odstinySedi.bmp')
-            #self._newimage_label.setPixmap(self._image)
             self._newimage_label.setPixmap(self._image.scaled(800, 500, Qt.KeepAspectRatio,Qt.FastTransformation))
             self._soubor = 'obraz_odstinySedi.bmp'
-
             return
 
         except Exception:
@@ -273,8 +266,6 @@ class MainWindow(QWidget):
 
     def select(self, pomocna=None):
         fname = QFileDialog.getOpenFileName(None, 'Nahrat BMP', '', "Image files (*.bmp)")
-        print(fname)
-        print(fname[0])
 
         self._image = QPixmap(fname[0])
         # self._image_label.setPixmap(self._image)
@@ -284,8 +275,7 @@ class MainWindow(QWidget):
 
         bmp = open(fname[0], 'rb')
         self._info_label.setText(str(
-            'Typ: ' + bmp.read(2).decode() + '\n'
-                                             'Velikost: %s' % struct.unpack('I', bmp.read(4))) + '\n'
+            'Typ: ' + bmp.read(2).decode() + '\n' 'Velikost: %s' % struct.unpack('I', bmp.read(4))) + '\n'
                                                                                                  'Reserved 1: %s' % struct.unpack(
             'H', bmp.read(2)) + '\n'
                                 'Reserved 2: %s' % struct.unpack('H', bmp.read(2)) + '\n'
